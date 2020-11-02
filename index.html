@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <title>Babylon.js sample code</title>
+
+        <!-- Babylon.js -->
+        <script src="https://code.jquery.com/pep/0.4.2/pep.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
+        <script src="https://preview.babylonjs.com/ammo.js"></script>
+        <script src="https://preview.babylonjs.com/cannon.js"></script>
+        <script src="https://preview.babylonjs.com/Oimo.js"></script>
+        <script src="https://preview.babylonjs.com/earcut.min.js"></script>
+        <script src="https://preview.babylonjs.com/babylon.js"></script>
+        <script src="https://preview.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+        <script src="https://preview.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+        <script src="https://preview.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+        <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+        <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+        <script src="https://preview.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+        </style>
+    </head>
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        var canvas = document.getElementById("renderCanvas");
+
+        var engine = null;
+        var scene = null;
+        var sceneToRender = null;
+        var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true }); };
+        var createScene =async function () {
+    // This creates a basic Babylon Scene object (non-mesh)
+    var scene = new BABYLON.Scene(engine);
+    //scene.clearColor = BABYLON.Color3.White();
+
+var box = BABYLON.MeshBuilder.CreateBox("moje_kostka",{size: 3},scene);
+    var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
+    //var camera = new BABYLON.ArcRotateCamera("arcCamera", BABYLON.Tools.ToRadians(45),BABYLON.Tools.ToRadians(70), 20.0, box.position, scene);
+    //var camera = new BABYLON.DeviceOrientationCamera("CAM_1",new BABYLON.Vector3(-10,10,-10),scene);        //kamera ze senzoru
+    //var camera = new BABYLON.VRDeviceOrientationFreeCamera("cam",new BABYLON.Vector3(10,10,10),scene);      //kamera
+
+
+    camera.setTarget(BABYLON.Vector3.Zero());   // This targets the camera to scene origin
+    camera.attachControl(canvas, true);     // This attaches the camera to the canvas
+    //WASD comtrol kamera
+    camera.keysUp.push(87);
+    camera.keysDown.push(83);
+    camera.keysLeft.push(65);
+    camera.keysRight.push(68);
+    camera.keysUpward.push(81);           //neni mozne pouzuit s arc camera
+    camera.keysDownward.push(88);
+
+
+    // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
+    var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), scene);
+    light.intensity = 0.7;
+
+    var freza = new BABYLON.SceneLoader.Append("https://dl.dropbox.com/s/ukx2e27mxy3e66t/", "sestava%20%281%29.glb", scene);
+    //var box = BABYLON.MeshBuilder.CreateBox("moje_kostka",{size: 3},scene);
+
+    var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: 5, segments: 32}, scene);
+    var box1 = BABYLON.MeshBuilder.CreateTiledBox("tbox",{pattern: 300, size: 2},scene);
+    var material1 = new BABYLON.StandardMaterial("material1", scene);
+    var material2 = new BABYLON.StandardMaterial("material2", scene);
+    material1.wireframe = true;
+    material2.cameraContrast = 1.9;
+
+    // Move the sphere upward 1/2 its height
+    sphere.position.y = 5;
+    box.position.y = 1;
+    box.material= material2;
+    box1.position = new BABYLON.Vector3(5,10,-5);
+    box1.material = material1;
+    
+    var ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 1000, height: 1000,subdivisions: 100}, scene);
+    ground.material = new BABYLON.GridMaterial("grid",scene);
+    ground.position.x = -1;
+
+
+    var Fullscreen = false;
+    var advanceTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+    var panel = new BABYLON.GUI.StackPanel();
+    panel.width = "220px";
+    panel.fontSize = "16px";
+    panel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+    panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+    panel.left = "20px";
+
+    advanceTexture.addControl(panel)
+
+    var fs_buuton = BABYLON.GUI.Button.CreateSimpleButton("button_1","fullscreen");
+    fs_buuton.width = "100px";
+    fs_buuton.height = "30px";
+    fs_buuton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+    fs_buuton.color = "black";
+    panel.addControl(fs_buuton);
+
+
+
+
+    fs_buuton.onPointerUpObservable.add(function(){
+
+        engine.switchFullscreen(true);
+    });
+
+
+    //var enviroment = scene.createDefaultEnvironment({createGround: false, skyboxSize:1000},scene)
+    //wdenviroment.setMainColor(BABYLON.Color3(0, 0.6, 1));
+
+
+
+    //const xr = await scene.createDefaultXRExperienceAsync({floorMeshes:[ground]});
+
+
+
+
+
+
+
+
+    return scene;
+};
+    var engine;
+    try {
+    engine = createDefaultEngine();
+    } catch(e) {
+    console.log("the available createEngine function failed. Creating the default engine instead");
+    engine = createDefaultEngine();
+    }
+        if (!engine) throw 'engine should not be null.';
+        scene = createScene();;
+        scene.then(returnedScene => { sceneToRender = returnedScene; });
+        
+
+        engine.runRenderLoop(function () {
+            if (sceneToRender && sceneToRender.activeCamera) {
+                sceneToRender.render();
+            }
+        });
+
+        // Resize
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+</body>
+</html>
